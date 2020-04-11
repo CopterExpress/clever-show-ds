@@ -1,0 +1,15 @@
+[Unit]
+Description=Clever Show Client Service
+Requires=roscore.service
+After=clover.service
+
+[Service]
+WorkingDirectory=/home/user/clever-show/Drone
+ExecStart=/bin/bash -c ". /home/user/catkin_ws/devel/setup.sh; \
+                      ROS_HOSTNAME=`hostname` /usr/bin/python /home/user/clever-show/Drone/copter_client.py"
+KillSignal=SIGKILL
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=Visual Pose Watchdog
+Requires=roscore.service
+
+[Service]
+User=user
+WorkingDirectory=/home/user/clever-show/Drone
+ExecStart=/usr/bin/python /home/user/clever-show/Drone/visual_pose_watchdog.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
