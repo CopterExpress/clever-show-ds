@@ -25,7 +25,20 @@ git clone https://github.com/goldarte/clever-show-ds.git
 cd <cloned repo>
 ```
 
-Execute `run` to run container with name and hostname `sim-0`.
+Execute this command to run container with name and hostname `sim`:
+
+```cmd
+docker run \
+    -it \
+    --rm \
+    --name sim \
+    --hostname sim \
+    --privileged=true \
+    -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+    goldarte/clever-show-ds
+```
+
+Or simple execute `run` bash script to run container with name and hostname `sim-0`.
 
 ```cmd
 ./run
@@ -42,6 +55,12 @@ If you want to run more copies of this container you can specify the first param
 ```
 
 This will run new container with name and hostname `sim-<param>`.
+
+If you want to open new terminal session in working container, use following command:
+
+```cmd
+docker exec -it <container name> bash
+```
 
 To stop and kill containers you can use
 
