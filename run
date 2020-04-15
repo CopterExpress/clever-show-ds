@@ -1,13 +1,55 @@
 #!/bin/bash
 
-name=sim-${1:-0}
-echo $name
+IMAGE_NAME=goldarte/clever-show-ds
+DEFAULT_CONTAINER_NAME=sim-0
+DEFAULT_PORT=14560
+CONTAINER_NAME=$DEFAULT_CONTAINER_NAME
+PORT=$DEFAULT_PORT
+
+function usage()
+{
+    echo ""
+    echo "Script for running docker image $IMAGE_NAME"
+    echo "Usage: ./run [options]"
+    echo "Options:"
+    echo -e "\t-h --help \tPrint this message"
+    echo -e "\t-i --id=ID \tSet container name and hostname to sim-<id> (default: 0)"
+    echo -e "\t-p --port=PORT \tSet UDP listening port for simulator data (default: $DEFAULT_PORT)"
+    echo ""
+}
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -i | --id)
+            CONTAINER_NAME=sim-$VALUE
+            ;;
+        -p | --port)
+            PORT=$VALUE
+            ;;
+        *)
+            echo "ERROR: unknown parameter \"$PARAM\""
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+echo -e "\nRun image $IMAGE_NAME with name and hostname $CONTAINER_NAME\nListening UDP port on host machine for simulator data is $PORT\n"
 
 docker run \
+    -d \
     -it \
     --rm \
-    --name $name \
-    --hostname $name \
+    --name $CONTAINER_NAME \
+    --hostname $CONTAINER_NAME \
     --privileged=true \
     -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-    goldarte/clever-show-ds
+    -p $PORT:14560/udp \
+    $IMAGE_NAME
