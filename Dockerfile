@@ -2,7 +2,8 @@
 FROM goldarte/clover-ds
 
 # Clone clever-show repo and install requirements
-RUN git clone --depth 1 https://github.com/CopterExpress/clever-show -b qt-gui-update /home/$ROSUSER/clever-show \
+RUN cd /home/user \
+	&& git clone --depth 1 https://github.com/CopterExpress/clever-show \
 	&& pip install -r /home/$ROSUSER/clever-show/Drone/requirements.txt
 
 # Copy services from repo
