@@ -10,7 +10,7 @@
     <arg name="Y" default="0"/>
     <arg name="ID" default="0"/>
     <arg name="vehicle" default="iris"/>
-    <arg name="port" default="14560"/>
+    <arg name="port" default="14601"/>
     <arg name="color" default="Purple"/>
     <!-- generate urdf vehicle model -->
     <arg name="cmd" default="$(find xacro)/xacro $(dirname)/models/$(arg vehicle)/urdf/$(arg vehicle)_base.xacro visual_material:=$(arg color) rotors_description_dir:=$(dirname)/models/$(arg vehicle) mavlink_udp_port:=$(arg port)"/>

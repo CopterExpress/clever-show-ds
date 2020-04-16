@@ -1,9 +1,9 @@
 #!/bin/bash
 
 IMAGE_NAME=goldarte/clever-show-ds
-DEFAULT_CONTAINER_NAME=sim-0
-DEFAULT_PORT=14560
-CONTAINER_NAME=$DEFAULT_CONTAINER_NAME
+DEFAULT_ID=1
+DEFAULT_PORT=14601
+CONTAINER_NAME=sim-$DEFAULT_ID
 PORT=$DEFAULT_PORT
 
 function usage()
@@ -13,7 +13,7 @@ function usage()
     echo "Usage: ./run [options]"
     echo "Options:"
     echo -e "\t-h --help \tPrint this message"
-    echo -e "\t-i --id=ID \tSet container name and hostname to sim-<id> (default: 0)"
+    echo -e "\t-i --id=ID \tSet container name and hostname to sim-<id> (default: $DEFAULT_ID)"
     echo -e "\t-p --port=PORT \tSet UDP listening port for simulator data (default: $DEFAULT_PORT)"
     echo ""
 }
