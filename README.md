@@ -27,11 +27,12 @@ This container includes:
 
 ## Simulate N copters in Gazebo
 
-Clone this repository and cd into it
+Clone this repository, cd into it and pull docker image:
 
 ```cmd
 git clone https://github.com/goldarte/clever-show-ds.git
 cd <cloned repo>
+docker pull goldarte/clever-show-ds
 ```
 
 Launch Gazebo simulator and generate n px4 copters with simulated companion
