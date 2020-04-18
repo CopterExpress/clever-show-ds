@@ -82,6 +82,12 @@ cd Server
 python3 server_qt.py
 ```
 
+Change option `send_ip` in `BROADCAST` section to `172.17.255.255` by clicking `Server` -> `Edit server config`
+
+![Server settings](docs/assets/server-settings.png)
+
+Check option `Restart` and click `Save` button.
+
 Wait until all simulated copters connect to server automatically.
 
 ![5 connected copters in table](docs/assets/copters-landed-table.png)
