@@ -61,6 +61,14 @@ python simulate.py -n 5
 
 ![5 generated copters in Gazebo](docs/assets/copters-landed.png)
 
+> If you get error:
+>
+> ```cmd
+> ImportError: No module named roslaunch
+> ```
+>
+> add `source /opt/ros/melodic/setup.bash` to the end of ~/.bashrc file.
+
 ## Control copters from clever-show server
 
 Clone [clever-show](https://github.com/CopterExpress/clever-show) repository and cd to it
