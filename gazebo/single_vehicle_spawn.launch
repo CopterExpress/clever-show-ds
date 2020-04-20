@@ -2,6 +2,7 @@
 <launch>
     <!-- Spawn single vehicle to gazebo sim (should be launched) -->
     <!-- Vehicle pose and config -->
+    <!-- <env name="GAZEBO_MODEL_PATH" value="$(dirname)/gazebo/models"/> -->
     <arg name="x" default="0"/>
     <arg name="y" default="0"/>
     <arg name="z" default="0"/>
@@ -13,7 +14,7 @@
     <arg name="port" default="14601"/>
     <arg name="color" default="Purple"/>
     <!-- generate urdf vehicle model -->
-    <arg name="cmd" default="$(find xacro)/xacro $(dirname)/models/$(arg vehicle)/urdf/$(arg vehicle)_base.xacro visual_material:=$(arg color) rotors_description_dir:=$(dirname)/models/$(arg vehicle) mavlink_udp_port:=$(arg port)"/>
+    <arg name="cmd" default="$(find xacro)/xacro $(dirname)/models/rotors_description/urdf/$(arg vehicle)_base.xacro visual_material:=$(arg color) rotors_description_dir:=$(dirname)/models/rotors_description mavlink_udp_port:=$(arg port)"/>
     <param command="$(arg cmd)" name="rotors_description"/>
     <!-- spawn vehicle -->
     <node name="$(anon spawn)" output="screen" pkg="gazebo_ros" type="spawn_model" args="-urdf -param rotors_description -model $(arg vehicle)_$(arg ID) -package_to_model -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>

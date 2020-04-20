@@ -2,7 +2,7 @@
 <launch>
     <!-- Gazebo configs -->
     <arg name="gui" default="true"/>
-    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
+    <arg name="world" default="$(dirname)/worlds/empty.world"/>
     <arg name="debug" default="false"/>
     <arg name="verbose" default="false"/>
     <arg name="paused" default="false"/>
