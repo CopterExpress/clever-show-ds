@@ -122,7 +122,9 @@ docker run \
     --rm \
     --name sim-1 \
     --hostname sim-1 \
-    --privileged=true \
+    --tmpfs /tmp \
+    --tmpfs /run \
+    --tmpfs /run/lock \
     -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
     -p 14601:14560/udp \
     goldarte/clever-show-ds
@@ -157,9 +159,10 @@ If you want to open new terminal session in working container, use following com
 docker exec -it <container name> bash
 ```
 
-To stop and kill containers you can use
+To stop or kill containers you can use
 
 ```cmd
+docker stop <container name>
 docker kill <container name>
 ```
 

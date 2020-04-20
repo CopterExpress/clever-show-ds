@@ -49,7 +49,9 @@ docker run \
     --rm \
     --name $CONTAINER_NAME \
     --hostname $CONTAINER_NAME \
-    --privileged=true \
+    --tmpfs /tmp \
+    --tmpfs /run \
+    --tmpfs /run/lock \
     -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
     -p $PORT:14560/udp \
     $IMAGE_NAME
