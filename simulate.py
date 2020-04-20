@@ -4,12 +4,14 @@ import subprocess
 import math
 import os
 
-dirpath = os.path.dirname(os.path.realpath(__file__))
-print("Script path is {}".format(dirpath))
+current_path = os.path.dirname(os.path.realpath(__file__))
+gazebo_path = os.path.join(current_path, 'gazebo/')
 
-run = os.path.join(dirpath,"run")
-spawn = os.path.join(dirpath,'single_vehicle_spawn.launch')
-gazebo = os.path.join(dirpath,'gazebo.launch')
+run = os.path.join(current_path,"run")
+spawn_launch = os.path.join(gazebo_path,'single_vehicle_spawn.launch')
+gazebo_launch = os.path.join(gazebo_path,'gazebo.launch')
+gazebo_plugins_dir = os.path.join(gazebo_path, 'plugins/')
+gazebo_models_dir = os.path.join(gazebo_path, 'models/')
 
 def positive_int(value):
     ivalue = int(value)
@@ -23,6 +25,15 @@ def positive_float(value):
         raise argparse.ArgumentTypeError("{} is an invalid value, must be positive".format(value))
     return ivalue
 
+def add_path_env(name, path):
+    value = os.environ.get(name, '')
+    if value:
+        value += ':' + path
+    else:
+        value = path
+    os.environ[name] = value
+    print("Set {} to {}".format(name, value))
+
 if __name__ == "__main__":
 
     # Set argument parser
@@ -35,18 +46,22 @@ if __name__ == "__main__":
                         help="Distance between generated copters. The generated copters will be arranged as a 2D array in a shape close to square.")
     args = parser.parse_args()
 
+    # Get xn, yn values for copters arranging
     n = float(args.number)  # Needs for ceiling
     xn = int(math.ceil(math.sqrt(n)))
     yn = int(math.ceil(n/xn))
     n = int(n)
-
     print("{} copters will be arranged to 2D array with xn = {}, yn = {}".format(args.number, xn, yn))
+
+    # Add Gazebo paths to environment
+    add_path_env('GAZEBO_PLUGIN_PATH', gazebo_plugins_dir)
+    add_path_env('GAZEBO_MODEL_PATH', gazebo_models_dir)
+    add_path_env('LD_LIBRARY_PATH', gazebo_plugins_dir)
 
     # Launch Gazebo
     uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
     roslaunch.configure_logging(uuid)
-
-    launch = roslaunch.parent.ROSLaunchParent(uuid, [gazebo])
+    launch = roslaunch.parent.ROSLaunchParent(uuid, [gazebo_launch])
     launch.start()
 
     # Run N docker containers with clever-show clients
@@ -62,7 +77,7 @@ if __name__ == "__main__":
             y = yi*args.dist
             output += "sim-{} ({}, {})\t".format(index, x, y)
             subprocess.call("{} -i={} -p={}".format(run, index, port), shell=True)
-            subprocess.call("roslaunch {} ID:={} port:={} x:={} y:={}".format(spawn, index, port, x, y), shell=True)
+            subprocess.call("roslaunch {} ID:={} port:={} x:={} y:={}".format(spawn_launch, index, port, x, y), shell=True)
         output += "\n"
 
     print(output)
@@ -70,7 +85,7 @@ if __name__ == "__main__":
     try:
         launch.spin()
     finally:
-        # After Ctrl+C, stop all nodes from running
+        # After Ctrl+C, stop all nodes and containers from running
         print("Shutdown detected!")
         for i in range(n):
             subprocess.call("docker kill sim-{}".format(i+1), shell=True)
