@@ -21,8 +21,7 @@ This container includes:
 ### Simulate copters in Gazebo (default)
 
 * Ubuntu 18.04
-* ROS Melodic ([install instruction](http://wiki.ros.org/melodic/Installation))
-* Gazebo 9 ([install instruction](http://gazebosim.org/tutorials?cat=install))
+* ROS Melodic Desktop-Full Install ([install instruction](http://wiki.ros.org/melodic/Installation/Ubuntu))
 * docker ([install instruction](https://docs.docker.com/get-docker/))
 
 ## Simulate N copters in Gazebo
