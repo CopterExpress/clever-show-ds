@@ -29,7 +29,7 @@ This container includes:
 Clone this repository, cd into it and pull docker image:
 
 ```cmd
-git clone https://github.com/goldarte/clever-show-ds.git
+git clone https://github.com/CopterExpress/clever-show-ds.git
 cd <cloned repo>
 docker pull goldarte/clever-show-ds
 ```
