@@ -1,8 +1,15 @@
 import argparse
-import roslaunch
 import subprocess
 import math
 import os
+from time import sleep
+
+roslaunch_imported = True
+try:
+    import roslaunch
+except ImportError:
+    roslaunch_imported = False
+
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 gazebo_path = os.path.join(current_path, 'gazebo/')
@@ -37,13 +44,15 @@ def add_path_env(name, path):
 if __name__ == "__main__":
 
     # Set argument parser
-    parser = argparse.ArgumentParser(description="Launch Gazebo simulator and generate n px4 copters with simulated companion computers")
+    parser = argparse.ArgumentParser(description="Simulate multiple Clover copters")
     parser.add_argument('-n','--number', type=positive_int, default='1',
                         help="Number of copters to simulate. Default is 1.")
     parser.add_argument('-p','--port', type=positive_int, default='14601',
                         help="UDP port for simulation data of the first copter. Default is 14601. UDP port for n-th copter will be equal to <port> + n - 1.")
     parser.add_argument('-d','--dist', type=positive_float, default='1',
-                        help="Distance between generated copters. The generated copters will be arranged as a 2D array in a shape close to square.")
+                        help="Distance between generated copters. The generated copters will be arranged as a 2D array along East and North axes in a shape close to square.")
+    parser.add_argument('--headless', action='store_true',
+                        help="Set this option to run internal lightweight simulation")
     args = parser.parse_args()
 
     # Get xn, yn values for copters arranging
@@ -53,40 +62,71 @@ if __name__ == "__main__":
     n = int(n)
     print("{} copters will be arranged to 2D array with xn = {}, yn = {}".format(args.number, xn, yn))
 
-    # Add Gazebo paths to environment
-    add_path_env('GAZEBO_PLUGIN_PATH', gazebo_plugins_dir)
-    add_path_env('GAZEBO_MODEL_PATH', gazebo_models_dir)
-    add_path_env('LD_LIBRARY_PATH', gazebo_plugins_dir)
-
-    # Launch Gazebo
-    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-    roslaunch.configure_logging(uuid)
-    launch = roslaunch.parent.ROSLaunchParent(uuid, [gazebo_launch])
-    launch.start()
-
-    # Run N docker containers with clever-show clients
-    # Spawn N models arranged as a 2D array in a shape close to square to Gazebo
     output = "\nGenerated copters:\n"
-    for yi in range(yn-1, -1, -1):
-        for xi in range(xn):
-            index = xi + yi*xn + 1
-            if index > n:
-                break
-            port = args.port + index - 1
-            x = xi*args.dist
-            y = yi*args.dist
-            output += "sim-{} ({}, {})\t".format(index, x, y)
-            subprocess.call("{} -i={} -p={}".format(run, index, port), shell=True)
-            subprocess.call("roslaunch {} ID:={} port:={} x:={} y:={}".format(spawn_launch, index, port, x, y), shell=True)
-        output += "\n"
 
-    print(output)
+    if args.headless:
 
-    try:
-        launch.spin()
-    finally:
-        # After Ctrl+C, stop all nodes and containers from running
-        print("Shutdown detected!")
-        for i in range(n):
-            subprocess.call("docker kill sim-{}".format(i+1), shell=True)
-        launch.shutdown()
+        # Run N docker containers with clever-show clients and jmavsim inside
+        for yi in range(yn-1, -1, -1):
+            for xi in range(xn):
+                index = xi + yi*xn + 1
+                if index > n:
+                    break
+                x = xi*args.dist
+                y = yi*args.dist
+                output += "sim-{} ({}, {})\t".format(index, x, y)
+                subprocess.call("{} -i={} --dx={} --dy={} --headless".format(run, index, x, y), shell=True)
+            output += "\n"
+        print(output)
+
+        # Wait for ctrl+c
+        while True:
+            try:
+                sleep(1)
+            except KeyboardInterrupt:
+                # Kill all running containers
+                for i in range(n):
+                    subprocess.call("docker kill sim-{}".format(i+1), shell=True)
+                quit()
+    else:
+
+        # Check that roslaunch was successfully imported
+        if not roslaunch_imported:
+            print("You don't have roslaunch module! Please, check your ROS installation.")
+            quit()
+
+        # Add Gazebo paths to environment
+        add_path_env('GAZEBO_PLUGIN_PATH', gazebo_plugins_dir)
+        add_path_env('GAZEBO_MODEL_PATH', gazebo_models_dir)
+        add_path_env('LD_LIBRARY_PATH', gazebo_plugins_dir)
+
+        # Launch Gazebo
+        uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+        roslaunch.configure_logging(uuid)
+        launch = roslaunch.parent.ROSLaunchParent(uuid, [gazebo_launch])
+        launch.start()
+
+        # Run N docker containers with clever-show clients
+        # Spawn N models arranged as a 2D array in a shape close to square to Gazebo
+        for yi in range(yn-1, -1, -1):
+            for xi in range(xn):
+                index = xi + yi*xn + 1
+                if index > n:
+                    break
+                x = xi*args.dist
+                y = yi*args.dist
+                output += "sim-{} ({}, {})\t".format(index, x, y)
+                subprocess.call("{} -i={}".format(run, index, port), shell=True)
+                subprocess.call("roslaunch {} ID:={} port:={} x:={} y:={}".format(spawn_launch, index, port, x, y), shell=True)
+            output += "\n"
+        print(output)
+
+        # Wait for ctrl+c
+        try:
+            launch.spin()
+        finally:
+            # After Ctrl+C, stop all nodes and containers from running
+            print("Shutdown detected!")
+            for i in range(n):
+                subprocess.call("docker kill sim-{}".format(i+1), shell=True)
+            launch.shutdown()
