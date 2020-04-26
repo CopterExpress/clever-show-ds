@@ -2,9 +2,19 @@
 
 IMAGE_NAME=goldarte/clever-show-ds
 DEFAULT_ID=1
-DEFAULT_PORT=14601
+DEFAULT_PORT=14560
+DEFAULT_LAT=55.703712
+DEFAULT_LON=37.724518
+DEFAULT_DX=0
+DEFAULT_DY=0
+ID=$DEFAULT_ID
 CONTAINER_NAME=sim-$DEFAULT_ID
 PORT=$DEFAULT_PORT
+HEADLESS=
+LAT=$DEFAULT_LAT
+LON=$DEFAULT_LON
+DX=$DEFAULT_DX
+DY=$DEFAULT_DY
 
 function usage()
 {
@@ -12,9 +22,16 @@ function usage()
     echo "Script for running docker image $IMAGE_NAME"
     echo "Usage: ./run [options]"
     echo "Options:"
-    echo -e "\t-h --help \tPrint this message"
-    echo -e "\t-i --id=ID \tSet container name and hostname to sim-<id> (default: $DEFAULT_ID)"
-    echo -e "\t-p --port=PORT \tSet UDP listening port for simulator data (default: $DEFAULT_PORT)"
+    echo -e "  -h --help \t\tPrint this message"
+    echo -e "  -i --id=ID \t\tID of simulated copter. Used as MAV_SYS_ID."
+    echo -e "\t\t\tContainer name and hostname are set to sim-<ID> (default: $DEFAULT_ID)"
+    echo -e "  -p --port=PORT \tInitial UDP port (default: $DEFAULT_PORT)"
+    echo -e "\t\t\tUDP listening port for simulator data is set to <PORT>+<ID>"
+    echo -e "  --headless \t\tSet this option to run lightweight jmavsim simulator directly in container"
+    echo -e "  --lat=LATITUDE \tSet initial latitude (default: $DEFAULT_LAT)"
+    echo -e "  --lon=LONGITUDE \tSet initial longitude (default: $DEFAULT_LON)"
+    echo -e "  --dx=DX \t\tSet dx shift in meters to East (default: $DEFAULT_DX)"
+    echo -e "  --dy=DY \t\tSet dy shift in meters to North (default: $DEFAULT_DY)"
     echo ""
 }
 
@@ -27,10 +44,26 @@ while [ "$1" != "" ]; do
             exit
             ;;
         -i | --id)
+            ID=$VALUE
             CONTAINER_NAME=sim-$VALUE
             ;;
         -p | --port)
             PORT=$VALUE
+            ;;
+        --headless)
+            HEADLESS=1
+            ;;
+        --lat)
+            LAT=$VALUE
+            ;;
+        --lon)
+            LON=$VALUE
+            ;;
+        --dx)
+            DX=$VALUE
+            ;;
+        --dy)
+            DY=$VALUE
             ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
@@ -41,9 +74,9 @@ while [ "$1" != "" ]; do
     shift
 done
 
-echo -e "\nRun image $IMAGE_NAME with name and hostname $CONTAINER_NAME\nListening UDP port on host machine for simulator data is $PORT\n"
+echo -e "\nRun image $IMAGE_NAME with name and hostname $CONTAINER_NAME"
 
-docker run \
+CMD1="docker run \
     -d \
     -it \
     --rm \
@@ -53,5 +86,25 @@ docker run \
     --tmpfs /run \
     --tmpfs /run/lock \
     -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-    -p $PORT:14560/udp \
-    $IMAGE_NAME
+    -e LAT=$LAT \
+    -e LON=$LON \
+    -e DX=$DX \
+    -e DY=$DY \
+    -e MAV_SYS_ID=$ID "
+
+CMD2="-p $((PORT+ID)):14560/udp "
+CMD3="-e HEADLESS=$HEADLESS "
+CMD4="$IMAGE_NAME"
+
+if [ -z $HEADLESS ]
+then
+    CMD=$CMD1$CMD2$CMD4
+    echo -e "Listening UDP port on host machine for simulator data is $((PORT+ID))"
+else
+    CMD=$CMD1$CMD3$CMD4
+    echo -e "Running in HEADLESS mode"
+fi
+
+echo -e "MAV_SYS_ID is set to $ID\n"
+
+eval $CMD
