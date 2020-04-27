@@ -49,7 +49,7 @@ Launch 5 px4 copters with simulated companion computers and simulation data insi
 python simulate.py -n 5 --headless
 ```
 
-In this case there will be no visualisation of copters because each simulated copter has its own lightweight simulator inside. Also, generated copters won't know anything about their collisions because each copter has its own simulated world inside.
+In this case there will be no visualization of copters because each simulated copter has its own lightweight simulator inside. Also, generated copters won't know anything about their collisions because each copter has its own simulated world inside.
 
 You can visualize telemetry data of generated copters on the map in [QGroundControl](#manage-copters-from-qgroundcontrol).
 
