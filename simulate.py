@@ -41,6 +41,12 @@ def add_path_env(name, path):
     os.environ[name] = value
     print("Set {} to {}".format(name, value))
 
+def kill_containers(n):
+    print("\nClear containers:")
+    for i in range(n):
+        subprocess.call("docker kill sim-{}".format(i+1), shell=True)
+    print("Cleared!")
+
 if __name__ == "__main__":
 
     # Set argument parser
@@ -48,12 +54,14 @@ if __name__ == "__main__":
     parser.add_argument('-n','--number', type=positive_int, default='1',
                         help="Number of copters to simulate. Default is 1.")
     parser.add_argument('-p','--port', type=positive_int, default='14601',
-                        help="UDP port for simulation data of the first copter. Default is 14601. UDP port for n-th copter will be equal to <port> + n - 1.")
+                        help="UDP port for simulation data of the first copter. Default is 14601. UDP port for n-th copter will be equal to <port> + n - 1. This parameter is used only in non headless mode.")
     parser.add_argument('-d','--dist', type=positive_float, default='1',
-                        help="Distance between generated copters. The generated copters will be arranged as a 2D array along East and North axes in a shape close to square.")
+                        help="Distance between generated copters in meters. Default is 1. The generated copters will be arranged as a 2D array along East and North axes in a shape close to square.")
     parser.add_argument('--headless', action='store_true',
-                        help="Set this option to run internal lightweight simulation")
+                        help="Set this option to run internal lightweight simulation.")
     args = parser.parse_args()
+
+    port = args.port - 1
 
     # Get xn, yn values for copters arranging
     n = float(args.number)  # Needs for ceiling
@@ -85,10 +93,7 @@ if __name__ == "__main__":
                 sleep(1)
             except KeyboardInterrupt:
                 # Kill all running containers
-                print("\nClear containers:")
-                for i in range(n):
-                    subprocess.call("docker kill sim-{}".format(i+1), shell=True)
-                print("Cleared!")
+                kill_containers(n)
                 quit()
     else:
 
@@ -101,6 +106,8 @@ if __name__ == "__main__":
         add_path_env('GAZEBO_PLUGIN_PATH', gazebo_plugins_dir)
         add_path_env('GAZEBO_MODEL_PATH', gazebo_models_dir)
         add_path_env('LD_LIBRARY_PATH', gazebo_plugins_dir)
+        os.environ['PX4_HOME_LAT'] = str(55.7031751)
+        os.environ['PX4_HOME_LON'] = str(37.7248118)
 
         # Launch Gazebo
         uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
@@ -118,8 +125,8 @@ if __name__ == "__main__":
                 x = xi*args.dist
                 y = yi*args.dist
                 output += "sim-{} ({}, {})\t".format(index, x, y)
-                subprocess.call("{} -i={}".format(run, index, port), shell=True)
-                subprocess.call("roslaunch {} ID:={} port:={} x:={} y:={}".format(spawn_launch, index, port, x, y), shell=True)
+                subprocess.call("{} -i={} -p={}".format(run, index, port), shell=True)
+                subprocess.call("roslaunch {} ID:={} port:={} x:={} y:={}".format(spawn_launch, index, port+index, x, y), shell=True)
             output += "\n"
         print(output)
 
@@ -128,7 +135,5 @@ if __name__ == "__main__":
             launch.spin()
         finally:
             # After Ctrl+C, stop all nodes and containers from running
-            print("Shutdown detected!")
-            for i in range(n):
-                subprocess.call("docker kill sim-{}".format(i+1), shell=True)
+            kill_containers(n)
             launch.shutdown()
