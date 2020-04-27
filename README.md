@@ -51,7 +51,7 @@ python simulate.py -n 5 --headless
 
 In this case there will be no visualisation of copters because each simulated copter has its own lightweight simulator inside. Also, generated copters won't know anything about their collisions because each copter has its own simulated world inside.
 
-You can visualize telemetry data of generated copters on the map in [QGrounControl](#manage-copters-from-qgroundcontrol).
+You can visualize telemetry data of generated copters on the map in [QGroundControl](#manage-copters-from-qgroundcontrol).
 
 ## Simulate multiple copters in Gazebo
 
@@ -97,7 +97,7 @@ optional arguments:
 
 ## Manage copters from QGroundControl
 
-All telemetry from copters is passed to 14550 UDP port. You can run QGroundCOntrol with default settings and see the telemetry from all generated copters:
+All telemetry from copters is passed to 14550 UDP port. You can run QGroundControl with default settings and see the telemetry from all generated copters:
 
 ![Telemetry data in QGC](docs/assets/copters-qgc.png)
 
@@ -153,7 +153,7 @@ More documentation about [clever-show](https://github.com/CopterExpress/clever-s
 
 ## Run container standalone
 
-Use `run` script to run container standalone. You specify next options:
+Use `run` script to run container standalone. You can specify next options:
 
 ```cmd
 ./run [options]
