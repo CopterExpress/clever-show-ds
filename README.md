@@ -71,6 +71,30 @@ python simulate.py -n 5
 >
 > check that you have ROS installed and add `source /opt/ros/melodic/setup.bash` to the end of ~/.bashrc file.
 
+## Configure
+
+You can configure simulation script:
+
+```cmd
+python simulate.py [-h] [-n NUMBER] [-p PORT] [-d DIST] [--headless]
+
+Simulate multiple Clover copters
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n NUMBER, --number NUMBER
+                        Number of copters to simulate. Default is 1.
+  -p PORT, --port PORT  UDP port for simulation data of the first copter.
+                        Default is 14601. UDP port for n-th copter will be
+                        equal to <port> + n - 1. This parameter is used only
+                        in non headless mode.
+  -d DIST, --dist DIST  Distance between generated copters in meters. Default
+                        is 1. The generated copters will be arranged as a 2D
+                        array along East and North axes in a shape close to
+                        square.
+  --headless            Set this option to run internal lightweight simulation.
+```
+
 ## Manage copters from QGroundControl
 
 All telemetry from copters is passed to 14550 UDP port. You can run QGroundCOntrol with default settings and see the telemetry from all generated copters:
