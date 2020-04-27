@@ -85,8 +85,10 @@ if __name__ == "__main__":
                 sleep(1)
             except KeyboardInterrupt:
                 # Kill all running containers
+                print("\nClear containers:")
                 for i in range(n):
                     subprocess.call("docker kill sim-{}".format(i+1), shell=True)
+                print("Cleared!")
                 quit()
     else:
 
