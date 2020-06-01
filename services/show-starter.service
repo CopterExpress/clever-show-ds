@@ -1,0 +1,9 @@
+[Unit]
+Description=Clever Show Starter Service
+After=clover.service
+
+[Service]
+ExecStart=/bin/bash -c "systemctl start clever-show@%H.service"
+
+[Install]
+WantedBy=multi-user.target
